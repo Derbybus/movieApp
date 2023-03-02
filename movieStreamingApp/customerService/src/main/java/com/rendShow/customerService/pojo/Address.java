@@ -1,6 +1,7 @@
 package com.rendShow.customerService.pojo;
 
-import jakarta.persistence.Embeddable;
+
+import javax.persistence.Embeddable;
 
 @Embeddable
 public class Address {

@@ -12,10 +12,10 @@ public class HistoryService {
 	@Autowired
 	private HistoryRepository historyRepository;
 	
-	@Transactional(readOnly = true)
-	public boolean historyData(String skuCode) {
-		return historyRepository.findBySkuCode().isPresent();
-		
-	}
+//	@Transactional(readOnly = true)
+//	public boolean historyData(String skuCode) {
+//		return historyRepository.findBySkuCode().isPresent();
+//
+//	}
 
 }

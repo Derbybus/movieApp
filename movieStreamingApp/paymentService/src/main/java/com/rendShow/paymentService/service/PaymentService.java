@@ -1,9 +1,10 @@
 package com.rendShow.paymentService.service;
 
-import com.rendShow.paymentService.dto.PaymentRequest;
+
+import com.rendShow.paymentService.pojo.Payments;
 
 public interface PaymentService {
 	
-	void createPayment(PaymentRequest paymentRequest);
+	Payments processPayment(Payments payments);
 
 }

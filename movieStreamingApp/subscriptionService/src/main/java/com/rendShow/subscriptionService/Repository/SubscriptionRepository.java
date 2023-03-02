@@ -10,7 +10,8 @@ import com.rendShow.subscriptionService.pojo.Subscriptions;
 
 @Repository
 public interface SubscriptionRepository extends JpaRepository<Subscriptions, Long> {
-    List<Subscriptions> findByCustomerId(String customerId);
+    Subscriptions findByPlanId(Long planId);
+    // List<Subscriptions> findByCustomerId(String customerId);
 
 //	List<Subscriptions> findBySubscriptionDateBetween(LocalDate startDate, LocalDate endDate);
 //

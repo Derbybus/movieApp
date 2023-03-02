@@ -1,18 +1,23 @@
 package com.rendShow.subscriptionService.service;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Objects;
 
-import com.rendShow.subscriptionService.dto.CustomersDto;
+
+import com.rendShow.subscriptionService.dto.Customers;
+import com.rendShow.subscriptionService.dto.ResponseTemplate;
 import com.rendShow.subscriptionService.pojo.SubscriptionType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.rendShow.subscriptionService.Repository.SubscriptionRepository;
-import com.rendShow.subscriptionService.config.WebClientConfig;
+//import com.rendShow.subscriptionService.config.WebClientConfig;
 import com.rendShow.subscriptionService.pojo.Subscriptions;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.client.RestTemplate;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -22,103 +27,82 @@ public class SubscriptionServiceImp implements SubscriptionService {
 	@Autowired
 	private SubscriptionRepository subscriptionRepository;
 	
-	@Autowired
-	private WebClientConfig webClientConfig;
+//	@Autowired
+//	private WebClientConfig webClientConfig;
 
-	
+	@Autowired
+	private RestTemplate restTemplate;
 
 	@Override
 	public Subscriptions createSubscription(Subscriptions subscriptions) {
-//		int userAllowed = 5;
-//		int usersTryingToAccess = subscriptions.getUsersAllowed();
-//		if(usersTryingToAccess > userAllowed){
-//			throw new AccessDeniedException("Maximum number of users exceeded.");
-//		}
-
+		////		int userAllowed = 5;
+////		int usersTryingToAccess = subscriptions.getUsersAllowed();
+////		if(usersTryingToAccess > userAllowed){
+////			throw new AccessDeniedException("Maximum number of users exceeded.");
+////		}
+//
+		// Gets the price of the subscription
 		double price = subscriptions.getPrice();
+		// Gets the subscription type as a string
 		String subscriptionType = String.valueOf(subscriptions.getSubscriptionType());
-		if(subscriptionType.equals("Basic")){
-			price +=100;
-		} else if (subscriptionType.equals("Standard")) {
-			price +=150;
-		} else if (subscriptionType.equals("Premium")) {
-			price +=200;
+		// Calculates the price of the subscription based on the subscription type
+		switch (subscriptionType) {
+			case "Basic" -> price += 100;
+			case "Standard" -> price += 150;
+			case "Premium" -> price += 200;
 		}
-		Subscriptions subscription = Subscriptions.builder()
-				.planId(subscriptions.getPlanId())
-				.price(price)
+
+		// Creates a new Subscriptions object with the updated price and subscription date
+        Subscriptions subscription = Subscriptions.builder()
+				.customerId(subscriptions.getCustomerId())
 				.subscriptionType(SubscriptionType.valueOf(subscriptionType))
-				.subscriptionDate(calculateEndDate())
+				.price(price)
+				.subscriptionDate(subscriptions.getSubscriptionDate())
 				.usersAllowed(subscriptions.getUsersAllowed())
+				.nextRenewalDate(calculateNextRenewalDate())
+				.planValidity(subscriptions.getPlanValidity())
 				.build();
 
-		return webClientConfig.webClientBuilder()
-				.build()
-				.post()
-				.uri("http://localhost:1001/api/customer", CustomersDto.builder())
-				.body(Mono.just(subscription), Subscriptions.class)
-				.retrieve()
-				.bodyToMono(Subscriptions.class)
-				.block();
-
-
-
+		return subscriptionRepository.save(subscription);
 	}
 
+	//Declares a private method that returns a local date object
 	private LocalDate calculateEndDate() {
+		//sets the plan validity to 30 days
 		int planValidity = 30;
+		//gets current date as the subscription date
 		LocalDate subscriptionDate = LocalDate.now();
+		//adds the plan validity in months to the subscription date and returns the resulting local date object
 		return (LocalDate) subscriptionDate.plusMonths(planValidity);
 	}
 
+	//calculates the date that the subscription should be renewed one month from the current date.
+	private Date calculateNextRenewalDate() {
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.MONTH, 1);
+		return cal.getTime();
 
-//	public void createSubscription(SubscriptionRequest subscriptionRequest) {
-//
-//	   Subscriptions subscriptions = Subscriptions.builder()
-//			   .subscriptionType(subscriptionRequest.getSubscriptionType())
-//			   //.subscriptionDate(subscriptionRequest.getSubscriptionDate())
-//			   .price(subscriptionRequest.getPrice())
-//			  // .planValidity(subscriptionRequest.getPlanValidity())
-//			 //  .usersAllowed(subscriptionRequest.getUsersAllowed())
-//			   .build();
-//	   CustomerResponse customerResponse = webClient.webClientBuilder()
-//                       .build()
-//                               .get()
-//                                       .uri("http://customer_service/api/customer/id")
-//                                               .retrieve()
-//                                                       .bodyToMono(CustomerResponse.class)
-//                                                               .block();
-//
-//	   subscriptionRepository.save(subscriptions);
-////	   log.info("Subscription {} is saved", subscriptions.getPlanId());
-//
-//	}
+	}
 
+    public Subscriptions getSubscriptionDetails(Long planId) {
+		return subscriptionRepository.findById(planId)
+				.stream()
+				.filter(subscriptions -> Objects.equals(subscriptions.getPlanId(), planId))
+				.findAny()
+				.orElseThrow();
+    }
 
-	
-//	private SubscriptionResponse mapToSubscriptionResponse(Subscriptions subscriptions) {
-//		return SubscriptionResponse.builder()
-//				.planId(subscriptions.getPlanId())
-//				.subscriptionType(subscriptions.getSubscriptionType())
-//				.price(subscriptions.getPrice())
-//				.planValidity(subscriptions.getPlanValidity())
-//				.usersAllowed(subscriptions.getUsersAllowed())
-//				.build();
-//	}
-	
-//	int planValidity = 30;
-//	SubscriptionService subscriptionService = new SubscriptionService();
-//	LocalDate startDate = LocalDate.of(2023, 2, 21);
-//	int planValidityDays = 30;
-//	LocalDate endDate = subscriptionService.calculateEndDate(startDate, planValidityDays);
-//	System.out.println("Subscription end date: " + endDate);
+	public ResponseTemplate getUserWithSubscriptions(Long planId) {
+		ResponseTemplate vo = new ResponseTemplate();
+		Subscriptions subscriptions = subscriptionRepository.findByPlanId(planId);
 
-	
-	
+		Customers customers = restTemplate.getForObject("http://localhost:1001/api/customer/" + subscriptions.getCustomerId(), Customers.class);
+		vo.setSubscriptions(subscriptions);
+		vo.setCustomers(customers);
+		return vo;
 
-	
-	
-	
+	}
+
 
 //	@Override
 //	public Subscriptions getSubscriptionById(Long id) {
@@ -143,33 +127,14 @@ public class SubscriptionServiceImp implements SubscriptionService {
 //		// TODO Auto-generated method stub
 //
 //	}
-//	
+
 //	@Override
 //	  public List<Subscriptions> getSubscriptionsByType(String subscriptionType) {
 //	    return subscriptionRepository.findBySubscriptionType(subscriptionType);
 //	  }
-//
-//	  @Override
-//	  public List<Subscriptions> getSubscriptionsByPriceRange(Double minPrice, Double maxPrice) {
-//	    return subscriptionRepository.findByPriceBetween(minPrice, maxPrice);
-//	  }
-//
-//	  @Override
-//	  public List<Subscriptions> getSubscriptionsByDateRange(LocalDate startDate, LocalDate endDate) {
-//	    return subscriptionRepository.findBySubscriptionDateBetween(startDate, endDate);
-//	  }
-//	  
-//	  
-//	  public LocalDate calculateExpirationDate(LocalDate startDate, Integer planValidity){
-//		  return startDate.plusMonths(planValidity);
-//	  }
-//	  
-//	  
-//	 
-//	  
-//	  public boolean canAccess(int usersTryingToAccess, int maxUsersAllowed) {
-//	        return usersTryingToAccess <= maxUsersAllowed;
-//	    }
+
+
+
 //	  
 //	    public boolean validateInput(Subscriptions subscription) {
 //	        // code to validate the user's input
@@ -186,8 +151,4 @@ public class SubscriptionServiceImp implements SubscriptionService {
 //		    }
 //	        return plan;
 //	    }
-//	  
-//	  
-
-
 }

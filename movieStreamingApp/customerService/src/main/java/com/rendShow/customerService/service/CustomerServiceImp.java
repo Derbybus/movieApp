@@ -3,6 +3,8 @@ package com.rendShow.customerService.service;
 import java.util.List;
 import java.util.Optional;
 
+//import com.rendShow.customerService.config.WebClientConfig;
+import com.rendShow.customerService.dto.Subscriptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,9 @@ public class CustomerServiceImp implements CustomerService {
 	@Autowired
 	private CustomerRepository customerRepository;
 
+//	@Autowired
+//	private WebClientConfig webClientConfig;
+
 
 	@Override
 	public Customers createCustomer(Customers customers) {
@@ -30,6 +35,8 @@ public class CustomerServiceImp implements CustomerService {
 
 	@Override
 	public Customers getCustomerById(Long id) {
+
+
 		return customerRepository.findById(id)
 				.stream()
 				.filter(customer -> customer.getId() == id)

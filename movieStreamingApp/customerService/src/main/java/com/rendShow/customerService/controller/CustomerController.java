@@ -2,17 +2,13 @@ package com.rendShow.customerService.controller;
 
 import java.util.List;
 
+
 import com.rendShow.customerService.config.WebClientConfig;
+import com.rendShow.customerService.dto.Subscriptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 import com.rendShow.customerService.pojo.Customers;
@@ -45,32 +41,38 @@ public class CustomerController {
 		return ResponseEntity.status(HttpStatus.CREATED).body("Customer successfully saved");
 		
 	}
+
+	//saves the subscription object
 //	@PostMapping("/customer-subscription")
-//	public SubscriptionDto customerSubscription(@RequestBody SubscriptionDto subscriptionDto ){
-////		return subscriptionDto;
+//	public Subscriptions customerSubscription(@RequestBody Subscriptions subscriptionDto ){
 //
-//		SubscriptionDto sub = SubscriptionDto.builder()
+//		Subscriptions sub = Subscriptions.builder()
 //				.email(subscriptionDto.getEmail())
-//				.price(subscriptionDto.getPrice())
 //				.subscriptionType(subscriptionDto.getSubscriptionType())
+//				.usersAllowed(subscriptionDto.getUsersAllowed())
 //				.build();
+//		//sends the new subscription to the subscription API
 //		return webClientConfig.webClientBuilder()
 //				.build()
 //				.post()
-//				//send the request to the post method in ticket service
-//				.uri("http://localhost:1003/api/subscription")
-//				.body(Mono.just(sub),SubscriptionDto.class)
+//				//send the request to the post method in subscription service
+//				.uri("http://subscription-service/api/subscription/create")
+//				//.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+//				.body(Mono.just(sub), Subscriptions.class)
 //				.retrieve()
-//				.bodyToMono(SubscriptionDto.class)
+//				.bodyToMono(Subscriptions.class)
 //				.block();
 //	}
+//
 
 
-	@GetMapping("/id/{id}")
-	public ResponseEntity<?> getCustomerId(@PathVariable("id") Long id){
-		Customers customer = service.getCustomerById(id);
-		return ResponseEntity.status(HttpStatus.OK).body(customer);
+
+	@GetMapping("/{id}")
+	public Customers getCustomerId(@PathVariable("id") Long id){
+		return service.getCustomerById(id);
+
 	}
+
 	
 	
 	@GetMapping("/name/{name}")
@@ -84,4 +86,18 @@ public class CustomerController {
 
 		return customerRepository.findAll();
 	}
+
+//	@PutMapping("/update/{id}")
+//	public Mono<Customers> updateCustomers(@RequestBody Customers customers){
+//		Customers customer = Customers.builder().build();
+//
+//		return webClientConfig.webClientBuilder()
+//				.build()
+//				.put()
+//				.uri("http://localhost:1001/api/customer/")
+//				.body(Customers.class)
+//				.retrieve()
+//				.bodyToMono(Customers.class)
+//				.block();
+//	}
 }

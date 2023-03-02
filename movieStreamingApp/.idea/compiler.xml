@@ -10,6 +10,7 @@
         <module name="serverService" />
         <module name="customerService" />
         <module name="paymentService" />
+        <module name="payPalApi" />
         <module name="subscriptionService" />
         <module name="genreService" />
         <module name="paymentHistoryService" />
@@ -22,6 +23,7 @@
       <module name="customerService" options="-parameters" />
       <module name="genreService" options="-parameters" />
       <module name="moviesService" options="-parameters" />
+      <module name="payPalApi" options="-parameters" />
       <module name="paymentHistoryService" options="-parameters" />
       <module name="paymentService" options="-parameters" />
       <module name="serverService" options="-parameters" />

@@ -15,10 +15,10 @@ public class HistoryController {
 	@Autowired
 	private HistoryService historyService;
 	
-	@GetMapping("/{sku-code}")
-	public boolean historyData(@PathVariable("sku-code") String skuCode) {
-		return historyService.historyData(skuCode);
-		
-	}
+//	@GetMapping("/{sku-code}")
+//	public boolean historyData(@PathVariable("sku-code") String skuCode) {
+//		return historyService.historyData(skuCode);
+//
+//	}
 
 }

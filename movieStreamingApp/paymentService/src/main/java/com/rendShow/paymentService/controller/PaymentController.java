@@ -1,12 +1,9 @@
 package com.rendShow.paymentService.controller;
 
+import com.rendShow.paymentService.pojo.Payments;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.rendShow.paymentService.dto.PaymentRequest;
 import com.rendShow.paymentService.service.PaymentServiceImp;
 
 @RestController
@@ -17,9 +14,14 @@ public class PaymentController {
 	private PaymentServiceImp paymentService;
 	
 	@PostMapping
-	public String makePayment(@RequestBody PaymentRequest paymentRequest) {
-		paymentService.createPayment(paymentRequest);
-		return "Payment made successfully";
+	public Payments makePayment(@RequestBody Payments payments) {
+		return paymentService.processPayment(payments);
+
+	}
+
+	@GetMapping("/{id}")
+	public Payments getPaymentDetailsWithUser(@PathVariable("id") Long paymentId){
+		return paymentService.getPaymentDetails(paymentId);
 	}
 
 }
