@@ -20,7 +20,7 @@ public class PaypalService {
             Double total,
             String currency,
             String method,
-            String intent,
+//            String intent,
             String cancelUrl,
             String successUrl) throws PayPalRESTException {
         Amount amount = new Amount();
@@ -38,7 +38,7 @@ public class PaypalService {
         payer.setPaymentMethod(method.toString());
 
         Payment payment = new Payment();
-        payment.setIntent(intent.toString());
+//        payment.setIntent(intent.toString());
         payment.setPayer(payer);
         payment.setTransactions(transactions);
         RedirectUrls redirectUrls = new RedirectUrls();

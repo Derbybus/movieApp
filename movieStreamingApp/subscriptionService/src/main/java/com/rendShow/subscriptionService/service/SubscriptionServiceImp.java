@@ -8,6 +8,8 @@ import java.util.Objects;
 
 import com.rendShow.subscriptionService.dto.Customers;
 import com.rendShow.subscriptionService.dto.ResponseTemplate;
+import com.rendShow.subscriptionService.exception.AccessDeniedException;
+import com.rendShow.subscriptionService.exception.IdNotFoundException;
 import com.rendShow.subscriptionService.pojo.SubscriptionType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,11 +37,11 @@ public class SubscriptionServiceImp implements SubscriptionService {
 
 	@Override
 	public Subscriptions createSubscription(Subscriptions subscriptions) {
-		////		int userAllowed = 5;
-////		int usersTryingToAccess = subscriptions.getUsersAllowed();
-////		if(usersTryingToAccess > userAllowed){
-////			throw new AccessDeniedException("Maximum number of users exceeded.");
-////		}
+				int userAllowed = 5;
+		int usersTryingToAccess = subscriptions.getUsersAllowed();
+		if(usersTryingToAccess > userAllowed){
+			throw new AccessDeniedException("Maximum number of users exceeded.");
+		}
 //
 		// Gets the price of the subscription
 		double price = subscriptions.getPrice();
@@ -92,11 +94,11 @@ public class SubscriptionServiceImp implements SubscriptionService {
 				.orElseThrow();
     }
 
-	public ResponseTemplate getUserWithSubscriptions(Long planId) {
+	public ResponseTemplate getUserWithSubscriptions(Long planId) throws IdNotFoundException {
 		ResponseTemplate vo = new ResponseTemplate();
 		Subscriptions subscriptions = subscriptionRepository.findByPlanId(planId);
 
-		Customers customers = restTemplate.getForObject("http://localhost:1001/api/customer/" + subscriptions.getCustomerId(), Customers.class);
+		Customers customers = restTemplate.getForObject("http://customer-service/api/customer/" + subscriptions.getCustomerId(), Customers.class);
 		vo.setSubscriptions(subscriptions);
 		vo.setCustomers(customers);
 		return vo;
@@ -104,12 +106,7 @@ public class SubscriptionServiceImp implements SubscriptionService {
 	}
 
 
-//	@Override
-//	public Subscriptions getSubscriptionById(Long id) {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-//
+
 //	@Override
 //	public List<Subscriptions> getAllSubscriptions() {
 //		// TODO Auto-generated method stub
@@ -134,14 +131,6 @@ public class SubscriptionServiceImp implements SubscriptionService {
 //	  }
 
 
-
-//	  
-//	    public boolean validateInput(Subscriptions subscription) {
-//	        // code to validate the user's input
-//	        return isValid;
-//	    }
-//
-//	  
 //	  public Subscriptions getPlanDetails(Long planId) {
 //	        // code to retrieve the plan details from the database
 //		  Subscriptions plan = getPlanDetails(planId);

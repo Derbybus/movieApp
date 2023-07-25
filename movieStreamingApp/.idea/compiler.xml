@@ -11,6 +11,7 @@
         <module name="customerService" />
         <module name="paymentService" />
         <module name="payPalApi" />
+        <module name="api-gateway" />
         <module name="subscriptionService" />
         <module name="genreService" />
         <module name="paymentHistoryService" />
@@ -20,6 +21,7 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="api-gateway" options="-parameters" />
       <module name="customerService" options="-parameters" />
       <module name="genreService" options="-parameters" />
       <module name="moviesService" options="-parameters" />

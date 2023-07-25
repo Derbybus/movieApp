@@ -1,46 +1,67 @@
 package com.rendShow.genreService.service;
 
+import java.io.IOException;
 import java.util.List;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
+import com.mongodb.client.gridfs.model.GridFSFile;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.gridfs.GridFsOperations;
+import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.stereotype.Service;
 
-import com.rendShow.genreService.dto.GenreRequest;
-import com.rendShow.genreService.dto.GenreResponse;
 import com.rendShow.genreService.pojo.Genre;
 import com.rendShow.genreService.respository.GenreRepository;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
-@Slf4j
+//@Slf4j
 public class GenreService {
-	
-	@Autowired
-	private GenreRepository genreRepository;
-	
-	public void createGenre(GenreRequest genreRequest) {
-		Genre genre = Genre.builder()
-				.category(genreRequest.getCategory())
-				.build();
-		
-		genreRepository.save(genre);
-		log.info("Genre {} is added", genre.getId());
-		
-	}
 
-	public List<GenreResponse> getAllGenre() {
-		List<Genre> genres = genreRepository.findAll();
-		
-		return genres.stream().map(this::mapToGenreResponse).toList();	
-		
-	}
-	
-	private GenreResponse mapToGenreResponse(Genre genre) {
-		return GenreResponse.builder()
-				.id(genre.getId())
-				.category(genre.getCategory())
-				.build();
-	}
+    @Autowired
+    private GridFsTemplate gridFsTemplate;
+
+    @Autowired
+    private GridFsOperations operations;
+
+    public String addVideo(String title, MultipartFile file) throws IOException {
+        DBObject metaData = new BasicDBObject();
+        metaData.put("type", "video");
+        metaData.put("title", title);
+        ObjectId id = gridFsTemplate.store(
+                file.getInputStream(), file.getName(), file.getContentType(), metaData);
+        return id.toString();
+    }
+
+    public Genre getVideo(String id) throws IllegalStateException, IOException {
+        GridFSFile file = gridFsTemplate.findOne(new Query(Criteria.where("_id").is(id)));
+        Genre video = new Genre();
+        video.setTitle(file.getMetadata().get("title").toString());
+        video.setStream(operations.getResource(file).getInputStream());
+        return video;
+    }
+
+//	@Autowired
+//	private GenreRepository genreRepository;
+//
+//	public Genre createGenre(Genre genre) {
+//		Genre genres = new Genre();
+//		genres.setCategory(genre.getCategory());
+//		return genreRepository.save(genres);
+//
+//	}
+//
+//	public List<Genre> getAllGenre() {
+//		return genreRepository.findAll();
+//
+//	}
+//
+
 
 }

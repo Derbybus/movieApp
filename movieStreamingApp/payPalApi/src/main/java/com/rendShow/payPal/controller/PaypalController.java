@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/api/paypal")
 public class PaypalController {
     @Autowired
     PaypalService paypalService;
@@ -18,6 +19,7 @@ public class PaypalController {
 
     @GetMapping("/")
     public String home(){
+
         return "home";
     }
 
@@ -26,7 +28,7 @@ public class PaypalController {
     public String payment(@ModelAttribute Subscriptions subscriptions){
         try {
             Payment payment = paypalService.createPayment(subscriptions.getPrice(), subscriptions.getCurrency(), subscriptions.getMethod(),
-                    subscriptions.getIntent(),  "http://localhost:9090/" + CANCEL_URL, "http://localhost:9090/" + SUCCESS_URL);
+                     "http://localhost:1006/" + CANCEL_URL, "http://localhost:1006/" + SUCCESS_URL);
             for(Links link:payment.getLinks()) {
                 if(link.getRel().equals("approval_url")) {
                     return "redirect:"+link.getHref();

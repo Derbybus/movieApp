@@ -1,10 +1,17 @@
 package com.rendShow.customerService.controller;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.logging.Logger;
 
 
 import com.rendShow.customerService.config.WebClientConfig;
+import com.rendShow.customerService.dto.AuthenticationRequest;
+import com.rendShow.customerService.dto.AuthenticationResponse;
 import com.rendShow.customerService.dto.Subscriptions;
+import com.rendShow.customerService.dto.UserModel;
+import com.rendShow.customerService.exception.ExceededDeviceException;
+import com.rendShow.customerService.pojo.Device;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +26,7 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/customer")
+//@CrossOrigin
 public class CustomerController {
 	
 	@Autowired
@@ -30,17 +38,48 @@ public class CustomerController {
 	@Autowired
 	private CustomerRepository customerRepository;
 	
-	@PostMapping
-	public ResponseEntity<?> addCustomer(@RequestBody Customers customer) {
-		Customers customers = service.createCustomer(customer);
-		if(customers != null){
-			return new ResponseEntity<String>("user exists", HttpStatus.OK);
-		}
-
-		customerRepository.save(customer);
-		return ResponseEntity.status(HttpStatus.CREATED).body("Customer successfully saved");
+	@PostMapping("/register")
+	public ResponseEntity<AuthenticationResponse> registerCustomer(@RequestBody UserModel userModel) {
+		return ResponseEntity.ok(service.createCustomer(userModel));
 		
 	}
+
+	private static final Logger LOGGER = Logger.getLogger(CustomerController.class.getName());
+	@PostMapping("/authenticate")
+	public ResponseEntity<AuthenticationResponse> login(@RequestBody AuthenticationRequest request, String email, String deviceId){
+		AuthenticationResponse response = service.authenticate(request);
+		if (response.isSuccess()){
+			boolean success = service.connectDevice(email, deviceId);
+			if (success){
+				LOGGER.info("Device connected for user " + email);
+			}
+		}
+		return ResponseEntity.ok(response);
+	}
+
+//	@PostMapping("/authenticate")
+//	public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
+//		AuthenticationResponse response = service.authenticate(request);
+//		if (response.isSuccess()) {
+//			String email = request.getEmail();
+//			String deviceId = request.getDeviceId();
+//			Customers customer = service.getCustomerByEmail(email);
+//			if (customer.getDevices().size() < 5) {
+//				Device device = new Device();
+//				device.setCustomers(customer);
+//				device.setLastConnected(LocalDateTime.now());
+//				customer.getDevices().add(device);
+//				customerRepository.save(customer);
+//				LOGGER.info("Device connected for user " + email);
+//			} else {
+//				throw new ExceededDeviceException("Error: User has already connected 5 devices");
+//			}
+//		}
+//		return ResponseEntity.ok(response);
+//	}
+
+
+
 
 	//saves the subscription object
 //	@PostMapping("/customer-subscription")
@@ -76,8 +115,8 @@ public class CustomerController {
 	
 	
 	@GetMapping("/name/{name}")
-	public ResponseEntity<?> getCustomerName(@PathVariable("name") String name){
-		Customers customer = service.getCustomerByName(name);
+	public ResponseEntity<?> getCustomerName(@PathVariable("name") String email){
+		Customers customer = service.getCustomerByEmail(email);
 		return ResponseEntity.status(HttpStatus.OK).body(customer);
 	}
 
@@ -86,6 +125,26 @@ public class CustomerController {
 
 		return customerRepository.findAll();
 	}
+
+//	@GetMapping("/device/{id}")
+//	public ResponseEntity<Boolean> deviceConnected(@PathVariable("id") String deviceId, String email) {
+//		boolean device = service.connectDevice(email, deviceId);
+//		return ResponseEntity.ok(device);
+//	}
+
+	@GetMapping("/devices")
+	public ResponseEntity<List<String>> getRegisteredDevices(String email) {
+		List<String> devices = service.getUserDevices(email);
+		return ResponseEntity.ok(devices);
+	}
+
+
+//	@GetMapping("/device/{id}")
+//	public ResponseEntity<?> deviceConnected(@PathVariable("id") String deviceId, String email){
+//		boolean device = service.connectDevice(email,deviceId);
+//		return ResponseEntity.status(HttpStatus.OK).body(device);
+//
+//	}
 
 //	@PutMapping("/update/{id}")
 //	public Mono<Customers> updateCustomers(@RequestBody Customers customers){

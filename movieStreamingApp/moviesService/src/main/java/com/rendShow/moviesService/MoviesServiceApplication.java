@@ -5,10 +5,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 import com.rendShow.moviesService.config.FileStorageProperties;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 
 @SpringBootApplication
-@EnableConfigurationProperties({FileStorageProperties.class})
+@EnableDiscoveryClient
 public class MoviesServiceApplication {
 
 	public static void main(String[] args) {

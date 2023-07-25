@@ -24,6 +24,7 @@
         <module>subscriptionService</module>
         <module>serverService</module>
         <module>payPalApi</module>
+        <module>api-gateway</module>
     </modules>
 
     <properties>

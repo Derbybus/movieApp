@@ -31,10 +31,10 @@ public class SubscriptionController {
 		
 	}
 
-//	@GetMapping("/id/{id}")
-//	public Subscriptions getSubscriptionsWithCustomer(@PathVariable("id") Long planId) {
-//		return subscriptionService.getSubscriptionDetails(planId);
-//	}
+	@GetMapping("/id/{id}")
+	public Subscriptions getSubscriptionsWithCustomer(@PathVariable("id") Long planId) {
+		return subscriptionService.getSubscriptionDetails(planId);
+	}
 
 	@GetMapping("/{id}")
 	public ResponseTemplate getUserSubscriptions(@PathVariable("id") Long planId){
